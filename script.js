@@ -1,3 +1,9 @@
+// Configuração da Conexão com o Supabase
+const SUPABASE_URL = "https://jdjpndfkpbhngfxazxfb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_sZx77tQK_78-BNLZJNIv4A_VanlyYBr"; // Cole aqui a chave anon/public
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const SENHA_ADM = "2307";
 
 // Produtos padrão iniciais com controle de estoque e tags
@@ -228,7 +234,7 @@ function toggleCarrinho() {
     modal.classList.toggle('flex');
 }
 
-function finalizarPedido() {
+async function finalizarPedido() {
     if(carrinho.length === 0) return alert("Seu carrinho está vazio!");
 
     let totalVenda = 0, custoTotal = 0, msgItens = "";
@@ -236,21 +242,23 @@ function finalizarPedido() {
         totalVenda += i.preco * i.quantidade;
         custoTotal += i.custo * i.quantidade;
         msgItens += `- ${i.quantidade}x ${i.nome} (R$ ${(i.preco * i.quantidade).toFixed(2).replace('.', ',')})\n`;
-
-        // Dar baixa no estoque
-        const prodRef = produtos.find(p => p.id === i.id);
-        if(prodRef) prodRef.estoque = Math.max(0, prodRef.estoque - i.quantidade);
     });
 
-    localStorage.setItem('produtos_oficina', JSON.stringify(produtos));
+    const lucroVenda = totalVenda - custoTotal;
 
-    historicoVendas.push({
-        data: new Date().toISOString(),
-        itens: [...carrinho],
-        total: totalVenda,
-        lucro: totalVenda - custoTotal
-    });
-    localStorage.setItem('historico_vendas_tio', JSON.stringify(historicoVendas));
+    // Salvar no Supabase
+    const { error } = await supabaseClient
+        .from('vendas')
+        .insert([{ total: totalVenda, lucro: lucroVenda }]);
+
+    if (error) {
+        alert("Erro ao registrar venda no banco!");
+        console.error(error);
+        return;
+    }
+
+    // Recarrega o histórico do banco
+    await carregarDadosDoBanco();
 
     const whatsAppNumber = "5522999999999"; // Substitua pelo número do seu tio
     const mensagem = encodeURIComponent(`Olá! Fiz um pedido no site para *Retirada na Oficina*:\n\n${msgItens}\n*Total: R$ ${totalVenda.toFixed(2).replace('.', ',')}*`);
