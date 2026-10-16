@@ -38,7 +38,7 @@
                     </div>
                 </div>
 
-                <!-- Botão do Painel e Carrinho no Mobile -->
+                <!-- Botão do Painel no Mobile -->
                 <div class="flex md:hidden items-center gap-2">
                     <button onclick="abrirPainelAdm()" class="bg-slate-800 active:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl text-xs font-bold border border-slate-700 flex items-center gap-1.5 shadow-sm">
                         <i class="fa-solid fa-lock text-red-500"></i> Painel
@@ -78,7 +78,7 @@
             <button onclick="filtrarProdutos('lubrificante', this)" class="btn-categoria bg-slate-900 text-slate-300 border border-slate-800 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap hover:bg-slate-800">Óleos</button>
         </div>
 
-        <!-- Vitrine de Produtos (Adaptável: 1 Coluna no Mobile, 2 no Tablet, 3 a 4 no PC) -->
+        <!-- Vitrine de Produtos -->
         <div id="vitrine-produtos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <!-- Cards injetados via JS -->
         </div>
@@ -118,16 +118,7 @@
                 <!-- Itens -->
             </div>
 
-            <!-- Seleção de Entrega / Retirada -->
             <div class="border-t border-slate-800 pt-3 space-y-3">
-                <div>
-                    <label class="text-xs font-bold text-slate-400 block mb-1.5">Forma de Recebimento:</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button id="btn-retirar" onclick="selecionarEntrega('retirar')" class="opcao-entrega active bg-red-600 text-white py-2 rounded-xl text-xs font-bold border border-red-500">Retirar no Balcão</button>
-                        <button id="btn-entregar" onclick="selecionarEntrega('entregar')" class="opcao-entrega bg-slate-800 text-slate-400 py-2 rounded-xl text-xs font-bold border border-slate-700">Entrega Motoboy</button>
-                    </div>
-                </div>
-
                 <div class="flex justify-between items-center font-bold text-base pt-1">
                     <span class="text-slate-300">Total:</span>
                     <span id="valor-total" class="text-xl font-black text-emerald-400">R$ 0,00</span>
