@@ -1,12 +1,11 @@
 // Configuração da Conexão com o Supabase
 const SUPABASE_URL = "https://jdjpndfkpbhngfxazxfb.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_sZx77tQK_78-BNLZJNIv4A_VanlyYBr"; // Cole aqui a chave anon/public
+const SUPABASE_ANON_KEY = "sb_publishable_sZx77tQK_78-BNLZJNIv4A_VanlyYBr"; 
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const SENHA_ADM = "2307";
 
-// Produtos padrão iniciais com controle de estoque e tags
 let produtos = JSON.parse(localStorage.getItem('produtos_oficina')) || [
     { id: 1, nome: "Rolamento de Roda 6004", moto: "CG 125/150/160, Bros", categoria: "pecas", preco: 35.00, custo: 18.00, estoque: 8, tag: "Mais Vendido", imagem: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=400&auto=format&fit=crop&q=60" },
     { id: 2, nome: "Cabo de Embreagem Reforçado", moto: "Honda Titan / Fan 150/160", categoria: "pecas", preco: 25.00, custo: 12.00, estoque: 2, tag: "Promoção", imagem: "https://images.unsplash.com/photo-1558980664-3a031cf67ea8?w=400&auto=format&fit=crop&q=60" },
@@ -22,23 +21,19 @@ let carrinho = JSON.parse(localStorage.getItem('carrinho_oficina')) || [];
 let historicoVendas = JSON.parse(localStorage.getItem('historico_vendas_tio')) || [];
 let categoriaAtual = 'todos';
 
-// Inicialização automática
 document.addEventListener('DOMContentLoaded', () => {
     verificarHorarioFuncionamento();
     renderizarProdutos();
     atualizarCarrinho();
 });
 
-// Horário de Funcionamento Dinâmico (Ex: Segunda a Sábado das 08:00 às 18:00)
 function verificarHorarioFuncionamento() {
     const agora = new Date();
-    const dia = agora.getDay(); // 0 = Domingo, 6 = Sábado
+    const dia = agora.getDay();
     const hora = agora.getHours();
-
     const ponto = document.getElementById('status-ponto');
     const texto = document.getElementById('status-texto');
 
-    // Supondo funcionamento Seg-Sex 08:00 às 18:00, Sáb 08:00 às 13:00, Dom Fechado
     let aberto = false;
     if (dia >= 1 && dia <= 5 && hora >= 8 && hora < 18) aberto = true;
     if (dia === 6 && hora >= 8 && hora < 13) aberto = true;
@@ -52,7 +47,6 @@ function verificarHorarioFuncionamento() {
     }
 }
 
-// Renderização da Vitrine com Tags e Estoque
 function renderizarProdutos(lista = produtos) {
     const vitrine = document.getElementById('vitrine-produtos');
     vitrine.innerHTML = '';
@@ -122,7 +116,6 @@ function renderizarProdutos(lista = produtos) {
     });
 }
 
-// Filtro Geral (Categoria + Busca Textual + Select de Moto)
 function filtrarGeral() {
     const termo = document.getElementById('campo-busca').value.toLowerCase();
     const motoSelecionada = document.getElementById('filtro-moto').value;
@@ -148,7 +141,6 @@ function filtrarCategoria(cat, el) {
     filtrarGeral();
 }
 
-// Carrinho com persistência
 function adicionarAoCarrinho(id) {
     const produto = produtos.find(p => p.id === id);
     const item = carrinho.find(i => i.id === id);
@@ -246,7 +238,6 @@ async function finalizarPedido() {
 
     const lucroVenda = totalVenda - custoTotal;
 
-    // Salvar no Supabase
     const { error } = await supabaseClient
         .from('vendas')
         .insert([{ total: totalVenda, lucro: lucroVenda }]);
@@ -257,10 +248,7 @@ async function finalizarPedido() {
         return;
     }
 
-    // Recarrega o histórico do banco
-    await carregarDadosDoBanco();
-
-    const whatsAppNumber = "5522999999999"; // Substitua pelo número do seu tio
+    const whatsAppNumber = "5522999999999"; 
     const mensagem = encodeURIComponent(`Olá! Fiz um pedido no site para *Retirada na Oficina*:\n\n${msgItens}\n*Total: R$ ${totalVenda.toFixed(2).replace('.', ',')}*`);
 
     carrinho = [];
@@ -270,18 +258,17 @@ async function finalizarPedido() {
     window.open(`https://wa.me/${whatsAppNumber}?text=${mensagem}`, '_blank');
 }
 
-// Painel do Tio & Abas
 function abrirPainelAdm() {
     document.getElementById('modal-adm').classList.remove('hidden');
     document.getElementById('modal-adm').classList.add('flex');
 }
 
+// CORREÇÃO: Reseta o painel ao fechar, exigindo senha novamente
 function fecharPainelAdm() {
     const modal = document.getElementById('modal-adm');
     modal.classList.remove('flex');
     modal.classList.add('hidden');
 
-    // Reseta a tela de login do painel para exigir a senha novamente na próxima abertura
     document.getElementById('bloco-senha').classList.remove('hidden');
     document.getElementById('bloco-conteudo-adm').classList.add('hidden');
     document.getElementById('input-senha').value = '';
@@ -320,7 +307,6 @@ function mudarAbaAdm(aba) {
     }
 }
 
-// Relatórios com Filtro por Período
 function carregarRelatorios() {
     const agora = new Date();
     let hoje = 0, semana = 0, mes = 0, lucro = 0;
@@ -340,7 +326,6 @@ function carregarRelatorios() {
             lucro += v.lucro;
         }
 
-        // Filtro personalizado
         if(dataInicio && dataFim) {
             const dataVendaStr = v.data.split('T')[0];
             if(dataVendaStr >= dataInicio && dataVendaStr <= dataFim) {
@@ -390,7 +375,6 @@ function limparHistorico() {
     }
 }
 
-// Exportar Vendas em CSV (Excel)
 function exportarCSV() {
     if(historicoVendas.length === 0) return alert("Não há vendas para exportar.");
     let csvContent = "data:text/csv;charset=utf-8,Data,Total (R$),Lucro (R$)\n";
@@ -406,17 +390,33 @@ function exportarCSV() {
     document.body.removeChild(link);
 }
 
-// CRUD de Produtos
+// MELHORIA: CRUD com busca de peças e alertas de estoque baixo na lista administrativa
 function carregarCrudProdutos() {
     const lista = document.getElementById('lista-crud-produtos');
+    const termoBusca = document.getElementById('busca-crud-pecas') ? document.getElementById('busca-crud-pecas').value.toLowerCase() : '';
     lista.innerHTML = '';
 
-    produtos.forEach(p => {
+    // Filtra produtos para o painel administrativo se houver termo digitado
+    const produtosFiltrados = produtos.filter(p => p.nome.toLowerCase().includes(termoBusca) || p.moto.toLowerCase().includes(termoBusca));
+
+    if(produtosFiltrados.length === 0) {
+        lista.innerHTML = '<p class="text-center text-slate-500 text-xs py-4">Nenhuma peça encontrada.</p>';
+        return;
+    }
+
+    produtosFiltrados.forEach(p => {
+        let badgeEstoque = `<span class="text-slate-400 text-[10px]">R$ ${p.preco.toFixed(2)} | Estoque: ${p.estoque}</span>`;
+        if (p.estoque === 0) {
+            badgeEstoque = `<span class="text-red-500 text-[10px] font-bold">R$ ${p.preco.toFixed(2)} | Esgotado!</span>`;
+        } else if (p.estoque <= 2) {
+            badgeEstoque = `<span class="text-amber-400 text-[10px] font-bold">R$ ${p.preco.toFixed(2)} | Estoque Baixo (${p.estoque})</span>`;
+        }
+
         lista.innerHTML += `
             <div class="bg-slate-900 p-2 rounded-lg border border-slate-800 flex justify-between items-center text-xs">
                 <div>
                     <span class="text-white font-bold block">${p.nome} (${p.moto})</span>
-                    <span class="text-slate-400 text-[10px]">R$ ${p.preco.toFixed(2)} | Estoque: ${p.estoque}</span>
+                    ${badgeEstoque}
                 </div>
                 <div class="flex gap-2">
                     <button onclick="editarProduto(${p.id})" class="text-blue-400 hover:text-blue-300 px-2 py-1"><i class="fa-solid fa-pen"></i></button>
@@ -443,7 +443,6 @@ function salvarProduto() {
     }
 
     if(idEdicao) {
-        // Editar
         const p = produtos.find(item => item.id == idEdicao);
         if(p) {
             p.nome = nome;
@@ -456,7 +455,6 @@ function salvarProduto() {
             if(imagem) p.imagem = imagem;
         }
     } else {
-        // Criar novo
         const novoId = produtos.length > 0 ? Math.max(...produtos.map(p => p.id)) + 1 : 1;
         produtos.push({
             id: novoId,
