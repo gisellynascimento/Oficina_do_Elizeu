@@ -11,12 +11,12 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans pb-24 md:pb-8 select-none">
 
-    <!-- Topo Informativo (Status e Endereço) -->
+    <!-- Topo Informativo (Status e Endereço Dinâmicos) -->
     <div class="bg-slate-900 border-b border-slate-800 px-4 py-2 text-xs text-slate-400">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="text-slate-200 font-medium">Oficina Aberta</span>
+                <span id="status-ponto" class="w-2 h-2 rounded-full bg-slate-500"></span>
+                <span id="status-texto" class="text-slate-200 font-medium">Verificando horário...</span>
             </div>
             <a href="https://maps.google.com" target="_blank" class="text-red-400 font-semibold flex items-center gap-1 hover:text-red-300 transition">
                 <i class="fa-solid fa-location-dot"></i> Como Chegar
@@ -50,7 +50,7 @@
             <div class="flex items-center gap-3 w-full md:w-auto">
                 <div class="relative flex-1 md:w-80">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-500 text-sm"></i>
-                    <input type="text" id="campo-busca" oninput="buscarProdutos(this.value)" placeholder="Buscar peça ou modelo (ex: CG, Bros)..." class="w-full bg-slate-950 text-white placeholder-slate-500 pl-10 pr-4 py-2.5 rounded-xl text-sm border border-slate-800 focus:outline-none focus:border-red-600">
+                    <input type="text" id="campo-busca" oninput="filtrarGeral()" placeholder="Buscar peça..." class="w-full bg-slate-950 text-white placeholder-slate-500 pl-10 pr-4 py-2.5 rounded-xl text-sm border border-slate-800 focus:outline-none focus:border-red-600">
                 </div>
 
                 <!-- Botões para Desktop -->
@@ -68,14 +68,28 @@
     </header>
 
     <!-- Conteúdo Principal -->
-    <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+    <main class="max-w-6xl mx-auto px-4 py-6 space-y-4">
         
-        <!-- Categorias -->
-        <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-            <button onclick="filtrarProdutos('todos', this)" class="btn-categoria active bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap shadow-md">Todas</button>
-            <button onclick="filtrarProdutos('pecas', this)" class="btn-categoria bg-slate-900 text-slate-300 border border-slate-800 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap hover:bg-slate-800">Peças</button>
-            <button onclick="filtrarProdutos('motor', this)" class="btn-categoria bg-slate-900 text-slate-300 border border-slate-800 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap hover:bg-slate-800">Motor</button>
-            <button onclick="filtrarProdutos('lubrificante', this)" class="btn-categoria bg-slate-900 text-slate-300 border border-slate-800 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap hover:bg-slate-800">Óleos</button>
+        <!-- Filtros (Categorias e Modelo de Moto) -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
+            <!-- Categorias -->
+            <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                <button onclick="filtrarCategoria('todos', this)" class="btn-categoria active bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap shadow-md">Todas</button>
+                <button onclick="filtrarCategoria('pecas', this)" class="btn-categoria bg-slate-900 text-slate-300 border border-slate-800 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap hover:bg-slate-800">Peças</button>
+                <button onclick="filtrarCategoria('motor', this)" class="btn-categoria bg-slate-900 text-slate-300 border border-slate-800 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap hover:bg-slate-800">Motor</button>
+                <button onclick="filtrarCategoria('lubrificante', this)" class="btn-categoria bg-slate-900 text-slate-300 border border-slate-800 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap hover:bg-slate-800">Óleos</button>
+            </div>
+
+            <!-- Filtro por Modelo de Moto (Select) -->
+            <div class="w-full sm:w-52">
+                <select id="filtro-moto" onchange="filtrarGeral()" class="w-full bg-slate-900 text-slate-200 border border-slate-800 px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-600">
+                    <option value="todos">Todas as Motos</option>
+                    <option value="CG 160">CG 160 / Titan / Fan</option>
+                    <option value="CG 125/150">CG 125 / 150</option>
+                    <option value="Bros">Bros</option>
+                    <option value="Universal">Universal / Outras</option>
+                </select>
+            </div>
         </div>
 
         <!-- Vitrine de Produtos -->
@@ -109,7 +123,7 @@
         <div class="bg-slate-900 text-slate-100 w-full max-w-md h-full p-5 flex flex-col border-l border-slate-800 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                 <h2 class="text-base font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-cart-shopping text-red-500"></i> Seu Pedido
+                    <i class="fa-solid fa-cart-shopping text-red-500"></i> Seu Pedido (Retirada)
                 </h2>
                 <button onclick="toggleCarrinho()" class="text-slate-400 hover:text-white text-2xl p-1">&times;</button>
             </div>
@@ -119,21 +133,29 @@
             </div>
 
             <div class="border-t border-slate-800 pt-3 space-y-3">
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-300 flex items-center gap-2.5">
+                    <i class="fa-solid fa-store text-red-500 text-base"></i>
+                    <div>
+                        <span class="font-bold block text-white">Retirada na Oficina</span>
+                        <span class="text-[11px] text-slate-400">O pagamento e retirada são feitos diretamente no balcão.</span>
+                    </div>
+                </div>
+
                 <div class="flex justify-between items-center font-bold text-base pt-1">
                     <span class="text-slate-300">Total:</span>
                     <span id="valor-total" class="text-xl font-black text-emerald-400">R$ 0,00</span>
                 </div>
 
                 <button onclick="finalizarPedido()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-xl font-extrabold shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] transition">
-                    <i class="fa-brands fa-whatsapp text-xl"></i> Enviar para o WhatsApp
+                    <i class="fa-brands fa-whatsapp text-xl"></i> Enviar Pedido para o WhatsApp
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Modal Painel de Controle -->
+    <!-- Modal Painel de Controle Avançado -->
     <div id="modal-adm" class="fixed inset-0 bg-black/85 hidden items-center justify-center z-50 p-3 backdrop-blur-sm">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-4 shadow-2xl flex flex-col max-h-[92vh]">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl p-4 shadow-2xl flex flex-col max-h-[92vh]">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                 <h2 class="text-base font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-chart-pie text-red-500"></i> Painel do Tio
@@ -144,7 +166,7 @@
             <!-- Tela de Senha -->
             <div id="bloco-senha" class="py-8 text-center space-y-4">
                 <i class="fa-solid fa-user-lock text-3xl text-red-500/80"></i>
-                <p class="text-slate-300 text-xs">Digite a senha para gerenciar ganhos:</p>
+                <p class="text-slate-300 text-xs">Digite a senha para gerenciar o sistema:</p>
                 <div class="flex flex-col gap-2 max-w-xs mx-auto">
                     <input type="password" id="input-senha" inputmode="numeric" placeholder="Senha" class="bg-slate-950 border border-slate-800 px-4 py-3 rounded-xl text-center text-white text-lg focus:outline-none focus:border-red-600">
                     <button onclick="verificarSenha()" class="bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold text-sm">Acessar Painel</button>
@@ -152,48 +174,118 @@
                 <p id="erro-senha" class="text-red-400 text-xs hidden font-bold">Senha incorreta!</p>
             </div>
 
-            <!-- Conteúdo do Painel -->
+            <!-- Conteúdo do Painel com Abas -->
             <div id="bloco-conteudo-adm" class="hidden flex-1 overflow-y-auto space-y-4 pt-3">
-                <div class="grid grid-cols-3 gap-2 text-center">
-                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                        <span class="text-[10px] text-slate-500 block font-bold uppercase">Hoje</span>
-                        <h3 id="relatorio-hoje" class="text-sm font-black text-white mt-0.5">R$ 0,00</h3>
-                    </div>
-                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                        <span class="text-[10px] text-slate-500 block font-bold uppercase">Semana</span>
-                        <h3 id="relatorio-semana" class="text-sm font-black text-white mt-0.5">R$ 0,00</h3>
-                    </div>
-                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                        <span class="text-[10px] text-slate-500 block font-bold uppercase">Mês</span>
-                        <h3 id="relatorio-mes" class="text-sm font-black text-emerald-400 mt-0.5">R$ 0,00</h3>
-                    </div>
+                
+                <!-- Abas do Painel -->
+                <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+                    <button onclick="mudarAbaAdm('relatorios')" id="tab-btn-relatorios" class="flex-1 py-2 rounded-lg text-xs font-bold bg-slate-800 text-white transition">Relatórios</button>
+                    <button onclick="mudarAbaAdm('produtos')" id="tab-btn-produtos" class="flex-1 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">Gerenciar Peças</button>
                 </div>
 
-                <div class="bg-emerald-950/30 border border-emerald-500/30 p-3 rounded-xl flex justify-between items-center">
+                <!-- Aba 1: Relatórios & Vendas -->
+                <div id="aba-relatorios" class="space-y-4">
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            <span class="text-[10px] text-slate-500 block font-bold uppercase">Hoje</span>
+                            <h3 id="relatorio-hoje" class="text-sm font-black text-white mt-0.5">R$ 0,00</h3>
+                        </div>
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            <span class="text-[10px] text-slate-500 block font-bold uppercase">Semana</span>
+                            <h3 id="relatorio-semana" class="text-sm font-black text-white mt-0.5">R$ 0,00</h3>
+                        </div>
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            <span class="text-[10px] text-slate-500 block font-bold uppercase">Mês</span>
+                            <h3 id="relatorio-mes" class="text-sm font-black text-emerald-400 mt-0.5">R$ 0,00</h3>
+                        </div>
+                    </div>
+
+                    <div class="bg-emerald-950/30 border border-emerald-500/30 p-3 rounded-xl flex justify-between items-center">
+                        <div>
+                            <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Lucro Estimado (Mês)</span>
+                            <h4 id="relatorio-lucro" class="text-xl font-black text-emerald-300">R$ 0,00</h4>
+                        </div>
+                        <i class="fa-solid fa-wallet text-2xl text-emerald-500/40"></i>
+                    </div>
+
+                    <!-- Filtro por Período Personalizado -->
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                        <span class="text-xs font-bold text-slate-300 block">Filtrar por Período Personalizado:</span>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[10px] text-slate-500 block">De:</label>
+                                <input type="date" id="filtro-data-inicio" onchange="carregarRelatorios()" class="w-full bg-slate-900 border border-slate-800 p-1.5 rounded-lg text-white text-xs">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-500 block">Até:</label>
+                                <input type="date" id="filtro-data-fim" onchange="carregarRelatorios()" class="w-full bg-slate-900 border border-slate-800 p-1.5 rounded-lg text-white text-xs">
+                            </div>
+                        </div>
+                        <div id="resultado-filtro-periodo" class="text-xs font-bold text-slate-200 pt-1">
+                            Faturamento no período: R$ 0,00
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                        <span class="text-xs font-bold text-slate-300 block">Lançar Venda no Balcão:</span>
+                        <div class="flex gap-2">
+                            <input type="number" id="venda-manual-valor" placeholder="Valor R$" class="bg-slate-900 border border-slate-800 px-3 py-2 rounded-xl text-white w-full text-sm">
+                            <button onclick="registrarVendaBalcao()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">Lançar</button>
+                        </div>
+                    </div>
+
                     <div>
-                        <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Lucro Estimado</span>
-                        <h4 id="relatorio-lucro" class="text-xl font-black text-emerald-300">R$ 0,00</h4>
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold text-slate-300 text-xs">Histórico de Pedidos & Vendas</h4>
+                            <div class="flex gap-2">
+                                <button onclick="exportarCSV()" class="text-[11px] text-emerald-400 font-semibold hover:underline flex items-center gap-1"><i class="fa-solid fa-file-excel"></i> Baixar CSV</button>
+                                <button onclick="limparHistorico()" class="text-[11px] text-red-400 font-semibold hover:underline">Limpar</button>
+                            </div>
+                        </div>
+                        <div id="lista-historico-vendas" class="space-y-1.5 max-h-36 overflow-y-auto bg-slate-950 p-2 rounded-xl border border-slate-800">
+                            <!-- Histórico via JS -->
+                        </div>
                     </div>
-                    <i class="fa-solid fa-wallet text-2xl text-emerald-500/40"></i>
                 </div>
 
-                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
-                    <span class="text-xs font-bold text-slate-300 block">Lançar Venda no Balcão:</span>
-                    <div class="flex gap-2">
-                        <input type="number" id="venda-manual-valor" placeholder="Valor R$" class="bg-slate-900 border border-slate-800 px-3 py-2 rounded-xl text-white w-full text-sm">
-                        <button onclick="registrarVendaBalcao()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">Lançar</button>
+                <!-- Aba 2: Gerenciamento de Produtos (CRUD) -->
+                <div id="aba-produtos" class="hidden space-y-4">
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-3">
+                        <h4 id="titulo-form-produto" class="text-xs font-bold text-white uppercase tracking-wider">Adicionar Nova Peça</h4>
+                        <input type="hidden" id="prod-edit-id">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="prod-nome" placeholder="Nome da Peça" class="bg-slate-900 border border-slate-800 p-2 rounded-xl text-xs text-white">
+                            <input type="text" id="prod-moto" placeholder="Moto (ex: CG 160)" class="bg-slate-900 border border-slate-800 p-2 rounded-xl text-xs text-white">
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <input type="number" id="prod-preco" placeholder="Preço (R$)" class="bg-slate-900 border border-slate-800 p-2 rounded-xl text-xs text-white">
+                            <input type="number" id="prod-custo" placeholder="Custo (R$)" class="bg-slate-900 border border-slate-800 p-2 rounded-xl text-xs text-white">
+                            <input type="number" id="prod-estoque" placeholder="Qtd Estoque" class="bg-slate-900 border border-slate-800 p-2 rounded-xl text-xs text-white">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="prod-categoria" class="bg-slate-900 border border-slate-800 p-2 rounded-xl text-xs text-white">
+                                <option value="pecas">Peças</option>
+                                <option value="motor">Motor</option>
+                                <option value="lubrificante">Lubrificantes</option>
+                            </select>
+                            <input type="text" id="prod-tag" placeholder="Tag (ex: Destaque, Promo)" class="bg-slate-900 border border-slate-800 p-2 rounded-xl text-xs text-white">
+                        </div>
+                        <input type="text" id="prod-imagem" placeholder="URL da Imagem (Opcional)" class="w-full bg-slate-900 border border-slate-800 p-2 rounded-xl text-xs text-white">
+                        
+                        <div class="flex gap-2 pt-1">
+                            <button onclick="salvarProduto()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl text-xs font-bold">Salvar Peça</button>
+                            <button onclick="limparFormProduto()" id="btn-cancelar-edicao" class="hidden bg-slate-800 text-slate-300 px-3 py-2 rounded-xl text-xs font-bold">Cancelar</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-slate-300 text-xs mb-2">Peças Cadastradas</h4>
+                        <div id="lista-crud-produtos" class="space-y-1.5 max-h-48 overflow-y-auto bg-slate-950 p-2 rounded-xl border border-slate-800">
+                            <!-- Lista CRUD via JS -->
+                        </div>
                     </div>
                 </div>
 
-                <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <h4 class="font-bold text-slate-300 text-xs">Histórico de Pedidos</h4>
-                        <button onclick="limparHistorico()" class="text-[11px] text-red-400 font-semibold hover:underline">Limpar</button>
-                    </div>
-                    <div id="lista-historico-vendas" class="space-y-1.5 max-h-40 overflow-y-auto bg-slate-950 p-2 rounded-xl border border-slate-800">
-                        <!-- Histórico via JS -->
-                    </div>
-                </div>
             </div>
         </div>
     </div>
