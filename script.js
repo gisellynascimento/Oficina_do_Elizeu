@@ -1,4 +1,4 @@
-const SENHA_ADM = "1234";
+const SENHA_ADM = "2307";
 let modoEntrega = "retirar";
 
 const produtos = [
