@@ -277,8 +277,15 @@ function abrirPainelAdm() {
 }
 
 function fecharPainelAdm() {
-    document.getElementById('modal-adm').classList.remove('flex');
-    document.getElementById('modal-adm').classList.add('hidden');
+    const modal = document.getElementById('modal-adm');
+    modal.classList.remove('flex');
+    modal.classList.add('hidden');
+
+    // Reseta a tela de login do painel para exigir a senha novamente na próxima abertura
+    document.getElementById('bloco-senha').classList.remove('hidden');
+    document.getElementById('bloco-conteudo-adm').classList.add('hidden');
+    document.getElementById('input-senha').value = '';
+    document.getElementById('erro-senha').classList.add('hidden');
 }
 
 function verificarSenha() {
