@@ -1,4 +1,4 @@
-const SENHA_ADM = "2307";
+const SENHA_ADM = "1234";
 let modoEntrega = "retirar";
 
 const produtos = [
@@ -20,27 +20,27 @@ function renderizarProdutos(lista = produtos) {
     vitrine.innerHTML = '';
 
     if(lista.length === 0) {
-        vitrine.innerHTML = '<p class="text-center text-slate-500 py-12 text-sm">Nenhuma peça encontrada.</p>';
+        vitrine.innerHTML = '<p class="col-span-full text-center text-slate-500 py-12 text-sm">Nenhuma peça encontrada.</p>';
         return;
     }
 
     lista.forEach(p => {
         vitrine.innerHTML += `
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex gap-3 items-center shadow-md">
-                <div class="w-24 h-24 rounded-xl overflow-hidden bg-slate-950 flex-shrink-0">
-                    <img src="${p.imagem}" alt="${p.nome}" class="w-full h-full object-cover">
-                </div>
-                <div class="flex-1 min-w-0">
-                    <span class="text-[9px] font-bold text-red-500 uppercase tracking-wider block">${p.categoria}</span>
-                    <h3 class="font-bold text-white text-sm leading-tight truncate mt-0.5">${p.nome}</h3>
-                    <p class="text-[11px] text-slate-400 truncate mt-0.5"><i class="fa-solid fa-motorcycle text-[9px] text-slate-500"></i> ${p.moto}</p>
-                    
-                    <div class="flex items-center justify-between mt-2.5">
-                        <span class="text-base font-black text-white">R$ ${p.preco.toFixed(2).replace('.', ',')}</span>
-                        <button onclick="adicionarAoCarrinho(${p.id})" class="bg-red-600 active:bg-red-700 text-white px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 shadow-md shadow-red-950">
-                            <i class="fa-solid fa-plus text-[10px]"></i> Adicionar
-                        </button>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex flex-col justify-between shadow-md hover:border-slate-700 transition">
+                <div>
+                    <div class="w-full h-36 rounded-xl overflow-hidden bg-slate-950 mb-3">
+                        <img src="${p.imagem}" alt="${p.nome}" class="w-full h-full object-cover">
                     </div>
+                    <span class="text-[9px] font-bold text-red-500 uppercase tracking-wider block">${p.categoria}</span>
+                    <h3 class="font-bold text-white text-sm leading-tight mt-0.5">${p.nome}</h3>
+                    <p class="text-[11px] text-slate-400 truncate mt-1"><i class="fa-solid fa-motorcycle text-[9px] text-slate-500"></i> ${p.moto}</p>
+                </div>
+                
+                <div class="flex items-center justify-between mt-4 pt-2 border-t border-slate-800/60">
+                    <span class="text-base font-black text-white">R$ ${p.preco.toFixed(2).replace('.', ',')}</span>
+                    <button onclick="adicionarAoCarrinho(${p.id})" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 shadow-md shadow-red-950 transition">
+                        <i class="fa-solid fa-plus text-[10px]"></i> Adicionar
+                    </button>
                 </div>
             </div>
         `;
@@ -95,6 +95,7 @@ function atualizarCarrinho() {
     const lista = document.getElementById('lista-carrinho');
     const totalEl = document.getElementById('valor-total');
     const badgeMobile = document.getElementById('badge-carrinho-mobile');
+    const badgeDesktop = document.getElementById('badge-carrinho-desktop');
     
     lista.innerHTML = '';
     let total = 0, qtdTotal = 0;
@@ -114,11 +115,11 @@ function atualizarCarrinho() {
                 </div>
                 <div class="flex items-center gap-2">
                     <div class="flex items-center bg-slate-900 border border-slate-800 rounded-lg">
-                        <button onclick="alterarQuantidade(${i.id}, -1)" class="px-2.5 py-1 text-slate-300 font-bold">-</button>
+                        <button onclick="alterarQuantidade(${i.id}, -1)" class="px-2.5 py-1 text-slate-300 font-bold hover:bg-slate-800">-</button>
                         <span class="px-2 text-white font-black">${i.quantidade}</span>
-                        <button onclick="alterarQuantidade(${i.id}, 1)" class="px-2.5 py-1 text-slate-300 font-bold">+</button>
+                        <button onclick="alterarQuantidade(${i.id}, 1)" class="px-2.5 py-1 text-slate-300 font-bold hover:bg-slate-800">+</button>
                     </div>
-                    <button onclick="removerDoCarrinho(${i.id})" class="text-red-400 p-1.5"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="removerDoCarrinho(${i.id})" class="text-red-400 hover:text-red-300 p-1.5"><i class="fa-solid fa-trash"></i></button>
                 </div>
             </div>
         `;
@@ -126,6 +127,7 @@ function atualizarCarrinho() {
 
     totalEl.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
     badgeMobile.innerText = qtdTotal;
+    if(badgeDesktop) badgeDesktop.innerText = qtdTotal;
 }
 
 function selecionarEntrega(tipo) {
