@@ -281,16 +281,18 @@
                     </div>
 
                     <div>
-                        <h4 class="font-bold text-slate-300 text-xs mb-2">Peças Cadastradas</h4>
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold text-slate-300 text-xs">Peças Cadastradas</h4>
+                        </div>
+                        <!-- Campo de busca rápida no painel -->
+                        <div class="mb-2">
+                            <input type="text" id="busca-crud-pecas" oninput="carregarCrudProdutos()" placeholder="Pesquisar peça cadastrada..." class="w-full bg-slate-950 border border-slate-800 p-2 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-600">
+                        </div>
                         <div id="lista-crud-produtos" class="space-y-1.5 max-h-48 overflow-y-auto bg-slate-950 p-2 rounded-xl border border-slate-800">
                             <!-- Lista CRUD via JS -->
                         </div>
                     </div>
                 </div>
-
-            </div>
-        </div>
-    </div>
 
     <script src="script.js"></script>
 </body>
