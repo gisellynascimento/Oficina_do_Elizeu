@@ -1,5 +1,4 @@
 const SENHA_ADM = "2307";
-let modoEntrega = "retirar";
 
 const produtos = [
     { id: 1, nome: "Rolamento de Roda 6004", moto: "CG 125/150/160, Bros", categoria: "pecas", preco: 35.00, custo: 18.00, imagem: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=400&auto=format&fit=crop&q=60" },
@@ -25,6 +24,26 @@ function renderizarProdutos(lista = produtos) {
     }
 
     lista.forEach(p => {
+        const itemNoCarrinho = carrinho.find(i => i.id === p.id);
+        const qtd = itemNoCarrinho ? itemNoCarrinho.quantidade : 0;
+
+        let seletorHTML = '';
+        if (qtd > 0) {
+            seletorHTML = `
+                <div class="flex items-center bg-slate-950 border border-red-600/80 rounded-xl overflow-hidden">
+                    <button onclick="alterarQuantidade(${p.id}, -1)" class="px-2.5 py-1 text-slate-300 font-bold hover:bg-slate-800 text-xs active:text-red-400">-</button>
+                    <span class="px-2 text-white font-black text-xs">${qtd}</span>
+                    <button onclick="alterarQuantidade(${p.id}, 1)" class="px-2.5 py-1 text-slate-300 font-bold hover:bg-slate-800 text-xs active:text-red-400">+</button>
+                </div>
+            `;
+        } else {
+            seletorHTML = `
+                <button onclick="adicionarAoCarrinho(${p.id})" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 shadow-md shadow-red-950 transition">
+                    <i class="fa-solid fa-plus text-[10px]"></i> Adicionar
+                </button>
+            `;
+        }
+
         vitrine.innerHTML += `
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex flex-col justify-between shadow-md hover:border-slate-700 transition">
                 <div>
@@ -38,9 +57,7 @@ function renderizarProdutos(lista = produtos) {
                 
                 <div class="flex items-center justify-between mt-4 pt-2 border-t border-slate-800/60">
                     <span class="text-base font-black text-white">R$ ${p.preco.toFixed(2).replace('.', ',')}</span>
-                    <button onclick="adicionarAoCarrinho(${p.id})" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 shadow-md shadow-red-950 transition">
-                        <i class="fa-solid fa-plus text-[10px]"></i> Adicionar
-                    </button>
+                    ${seletorHTML}
                 </div>
             </div>
         `;
@@ -128,20 +145,8 @@ function atualizarCarrinho() {
     totalEl.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
     badgeMobile.innerText = qtdTotal;
     if(badgeDesktop) badgeDesktop.innerText = qtdTotal;
-}
 
-function selecionarEntrega(tipo) {
-    modoEntrega = tipo;
-    const btnR = document.getElementById('btn-retirar');
-    const btnE = document.getElementById('btn-entregar');
-
-    if(tipo === 'retirar') {
-        btnR.className = "opcao-entrega active bg-red-600 text-white py-2 rounded-xl text-xs font-bold border border-red-500";
-        btnE.className = "opcao-entrega bg-slate-800 text-slate-400 py-2 rounded-xl text-xs font-bold border border-slate-700";
-    } else {
-        btnE.className = "opcao-entrega active bg-red-600 text-white py-2 rounded-xl text-xs font-bold border border-red-500";
-        btnR.className = "opcao-entrega bg-slate-800 text-slate-400 py-2 rounded-xl text-xs font-bold border border-slate-700";
-    }
+    renderizarProdutos(produtos);
 }
 
 function removerDoCarrinho(id) {
@@ -174,8 +179,7 @@ function finalizarPedido() {
     localStorage.setItem('historico_vendas_tio', JSON.stringify(historicoVendas));
 
     const whatsAppNumber = "5522999999999"; // ALTERE AQUI O NÚMERO DO SEU TIO
-    const entregaTexto = modoEntrega === 'retirar' ? "Vou retirar no balcão da oficina" : "Preciso de entrega via Motoboy";
-    const mensagem = encodeURIComponent(`Olá! Gostaria de pedir as peças:\n\n${msgItens}\n*Opção:* ${entregaTexto}\n*Total: R$ ${totalVenda.toFixed(2).replace('.', ',')}*`);
+    const mensagem = encodeURIComponent(`Olá! Gostaria de fazer o pedido das seguintes peças:\n\n${msgItens}\n*Total: R$ ${totalVenda.toFixed(2).replace('.', ',')}*`);
 
     carrinho = [];
     atualizarCarrinho();
