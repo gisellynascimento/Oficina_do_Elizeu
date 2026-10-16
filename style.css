@@ -1,5 +1,5 @@
-/* Previne zoom em inputs de mobile */
-input, select, button {
+/* Previne zoom automático apenas em inputs e selects no mobile */
+input, select, textarea {
     font-size: 16px !important;
 }
 
@@ -12,7 +12,7 @@ input, select, button {
     scrollbar-width: none;
 }
 
-/* Ajustes visuais extras */
+/* Ajustes visuais globais */
 body {
     -webkit-tap-highlight-color: transparent;
 }
