@@ -1,13 +1,18 @@
-/* Previne zoom acidental em inputs no iOS/Android */
+/* Previne zoom em inputs de mobile */
 input, select, button {
     font-size: 16px !important;
 }
 
-/* Ocultar barra de rolagem horizontal mantendo a funcionalidade de toque */
+/* Oculta scrollbar mantendo toque suave */
 .scrollbar-none::-webkit-scrollbar {
     display: none;
 }
 .scrollbar-none {
     -ms-overflow-style: none;
     scrollbar-width: none;
+}
+
+/* Ajustes visuais extras */
+body {
+    -webkit-tap-highlight-color: transparent;
 }
